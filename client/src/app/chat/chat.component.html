@@ -1,0 +1,18 @@
+<div class="chatBox">
+  <div class="chatBoxWrapper">
+    <ng-container *ngIf="selectedConversation">
+      <div class="chatBoxTop" id="chat-container">
+        <div *ngFor="let message of messages">
+          <app-message [message]="message" [currentUser]="currentUser"></app-message>
+        </div>
+      </div>
+      <div class="chatBoxBottom">
+        <textarea class="chatMessageInput" placeholder="write something..." [(ngModel)]="newMessage"></textarea>
+        <button class="chatSubmitButton" (click)="handleSubmit()">Send</button>
+      </div>
+    </ng-container>
+    <span *ngIf="!selectedConversation" class="noConversationText">
+      Open a conversation to start a chat.
+    </span>
+  </div>
+</div>

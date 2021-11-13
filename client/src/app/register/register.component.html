@@ -1,0 +1,18 @@
+<div class="login">
+  <div class="loginWrapper">
+    <div class="loginLeft">
+      <h3 class="loginLogo">ChitChat</h3>
+      <span class="loginDesc"> chat with your friends. </span>
+    </div>
+    <div class="loginRight">
+      <input placeholder="Username" required class="loginInput" [(ngModel)]="username" />
+      <input placeholder="Email" required class="loginInput" type="email" [(ngModel)]="email" />
+      <input placeholder="Password" required class="loginInput" type="password" [(ngModel)]="password" />
+      <input placeholder="Password Again" required class="loginInput" type="password" [(ngModel)]="passwordAgain" />
+      <button class="loginButton" type="submit" (click)="handleClick()">
+        Sign Up
+      </button>
+      <button class="loginRegisterButton" (click)="routeToLogin()">Log into Account</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+<!-- <Topbar /> -->
+<div class="messenger">
+  <div class="chatMenu">
+    <div class="chatMenuWrapper">
+      <input placeholder="Search for friends" class="chatMenuInput" />
+      <div *ngFor="let conversation of conversations">
+        <app-conversation [conversation]="conversation" [currentUser]="user" (click)="handleClick(conversation)">
+        </app-conversation>
+      </div>
+    </div>
+  </div>
+  <app-chat class="chatBox" [user]="user" [selectedConversation]="selectedConversation"></app-chat>
+</div>
