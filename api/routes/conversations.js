@@ -1,15 +1,12 @@
 const router = require("express").Router();
-const Conversation = require("../models/Conversation");
+const dbConnection = require("../connect");
 
 //new conv
 
 router.post("/", async (req, res) => {
-  const newConversation = new Conversation({
-    members: [req.body.senderId, req.body.receiverId],
-  });
-
   try {
-    const savedConversation = await newConversation.save();
+    const savedConversation = await dbConnection.query("INSERT INTO conversations (firstUser,secondUser) VALUE (?)", [req.body.senderId, req.body.receiverId])
+
     res.status(200).json(savedConversation);
   } catch (err) {
     res.status(500).json(err);
@@ -20,26 +17,12 @@ router.post("/", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   try {
-    const conversation = await Conversation.find({
-      members: { $in: [req.params.userId] },
-    });
+    const [conversation] = await dbConnection.query("SELECT * FROM conversations WHERE firstUser = ? OR secondUser=?", [req.params.userId, req.params.userId])
     res.status(200).json(conversation);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// get conv includes two userId
-
-router.get("/find/:firstUserId/:secondUserId", async (req, res) => {
-  try {
-    const conversation = await Conversation.findOne({
-      members: { $all: [req.params.firstUserId, req.params.secondUserId] },
-    });
-    res.status(200).json(conversation);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
 
 module.exports = router;

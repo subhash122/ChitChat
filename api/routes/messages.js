@@ -1,11 +1,11 @@
 const router = require("express").Router();
-const Message = require("../models/Message");
+const dbConnection = require("../connect");
 
 router.post("/", async (req, res) => {
-  const newMessage = new Message(req.body);
-
+  
   try {
-    const savedMessage = await newMessage.save();
+    let q = 'INSERT INTO messages (conversationId,sender,text) VALUE (?)'
+    const savedMessage = dbConnection.query(q, [req.body.conversationId, req.body.sender, req.body.text]);
     res.status(200).json(savedMessage);
   } catch (err) {
     res.status(500).json(err);
@@ -14,9 +14,8 @@ router.post("/", async (req, res) => {
 
 router.get("/:conversationId", async (req, res) => {
   try {
-    const messages = await Message.find({
-      conversationId: req.params.conversationId,
-    });
+    let q = 'SELECT * FROM messages WHERE conversationId = ?'
+    const [messages] = dbConnection.query(q, [req.params.conversationId]);
     res.status(200).json(messages);
   } catch (err) {
     res.status(500).json(err);

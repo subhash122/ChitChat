@@ -1,2 +1,2 @@
-- Created a realtime chatting application build using angular and express.
+- Realtime chatting application build using angular and express.
 - Integrated socket.io for sending realtime one on one messages.
