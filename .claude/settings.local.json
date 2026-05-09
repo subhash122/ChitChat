@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(rm /home/shubhash-joshi/Desktop/poc-repos/poc-rabbitmq/server/src/index.ts)",
+      "Bash(node -e \"console.log\\(require\\('@types/express/package.json'\\).version\\)\")"
+    ]
+  }
+}
