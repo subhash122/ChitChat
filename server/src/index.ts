@@ -10,12 +10,6 @@ import messagesRouter from './routes/messages'
 import { rabbitmqService } from './services/rabbitmq'
 import { initializeSocket } from './services/socket'
 
-const REQUIRED_ENV = ['CLIENT_URL', 'SERVER_PORT', 'RABBITMQ_URL', 'JWT_SECRET', 'DATABASE_URL'] as const
-for (const key of REQUIRED_ENV) {
-	if (!process.env[key]) {
-		throw new Error(`Missing required env var: ${key}`)
-	}
-}
 
 const app = express()
 const server = http.createServer(app)
