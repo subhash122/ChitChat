@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String         @id @default(uuid())
+  email            String         @unique
+  name             String
+  password         String
+  createdAt        DateTime       @default(now()) @map("created_at")
+  conversations1   Conversation[] @relation("user1")
+  conversations2   Conversation[] @relation("user2")
+  receivedMessages Message[]      @relation("receiver")
+  sentMessages     Message[]      @relation("sender")
+
+  @@map("users")
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  user1Id   String    @map("user1_id")
+  user2Id   String    @map("user2_id")
+  lastMsgAt DateTime? @map("last_msg_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user1     User      @relation("user1", fields: [user1Id], references: [id])
+  user2     User      @relation("user2", fields: [user2Id], references: [id])
+  messages  Message[]
+
+  @@unique([user1Id, user2Id])
+  @@map("conversations")
+}
+
+model Message {
+  id             String        @id @default(uuid())
+  conversationId String        @map("conversation_id")
+  senderId       String        @map("sender_id")
+  receiverId     String        @map("receiver_id")
+  content        String
+  status         MessageStatus @default(SENT)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  deliveredAt    DateTime?     @map("delivered_at")
+  readAt         DateTime?     @map("read_at")
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+  receiver       User          @relation("receiver", fields: [receiverId], references: [id])
+  sender         User          @relation("sender", fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@index([receiverId, status])
+  @@map("messages")
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
