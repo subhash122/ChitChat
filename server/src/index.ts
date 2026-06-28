@@ -7,9 +7,16 @@ import authRouter from './routes/auth'
 import usersRouter from './routes/users'
 import conversationsRouter from './routes/conversations'
 import messagesRouter from './routes/messages'
+import groupsRouter from './routes/groups'
 import { rabbitmqService } from './services/rabbitmq'
 import { initializeSocket } from './services/socket'
 
+const REQUIRED_ENV = ['CLIENT_URL', 'SERVER_PORT', 'RABBITMQ_URL', 'JWT_SECRET', 'DATABASE_URL'] as const
+for (const key of REQUIRED_ENV) {
+	if (!process.env[key]) {
+		throw new Error(`Missing required env var: ${key}`)
+	}
+}
 
 const app = express()
 const server = http.createServer(app)
@@ -26,6 +33,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/conversations', conversationsRouter)
 app.use('/api/messages', messagesRouter)
+app.use('/api/groups', groupsRouter)
 
 // Health check
 app.get('/api/health', (_req, res) => {
