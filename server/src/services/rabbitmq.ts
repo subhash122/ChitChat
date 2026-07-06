@@ -1,6 +1,7 @@
 import amqp, { Channel, ChannelModel, ConsumeMessage } from 'amqplib'
 
-const EXCHANGE_NAME = 'chat.direct'
+const DIRECT_EXCHANGE = 'chat.direct'
+const GROUP_EXCHANGE = 'chat.group'
 
 class RabbitMQService {
 	private connection: ChannelModel | null = null
@@ -18,8 +19,9 @@ class RabbitMQService {
 		this.connection = await amqp.connect(url)
 		this.channel = await this.connection.createChannel()
 
-		// Declare the direct exchange
-		await this.channel.assertExchange(EXCHANGE_NAME, 'direct', { durable: true })
+		// Declare the exchanges
+		await this.channel.assertExchange(DIRECT_EXCHANGE, 'direct', { durable: true })
+		await this.channel.assertExchange(GROUP_EXCHANGE, 'direct', { durable: true })
 
 		console.log('RabbitMQ connected')
 
@@ -42,7 +44,7 @@ class RabbitMQService {
 
 		const queueName = `user.${userId}.messages`
 		await this.channel.assertQueue(queueName, { durable: true })
-		await this.channel.bindQueue(queueName, EXCHANGE_NAME, userId)
+		await this.channel.bindQueue(queueName, DIRECT_EXCHANGE, userId)
 
 		return queueName
 	}
@@ -57,8 +59,40 @@ class RabbitMQService {
 		if (!queueName) return
 
 		this.channel.publish(
-			EXCHANGE_NAME,
+			DIRECT_EXCHANGE,
 			recipientId,
+			Buffer.from(JSON.stringify(message)),
+			{ persistent: true }
+		)
+	}
+
+	async bindUserToGroup(userId: string, groupId: string): Promise<void> {
+		if (!this.channel) {
+			console.error('RabbitMQ not connected: cannot bind', userId, 'to group', groupId)
+			return
+		}
+		const queueName = await this.ensureUserQueue(userId)
+		if (!queueName) return
+		await this.channel.bindQueue(queueName, GROUP_EXCHANGE, `group.${groupId}`)
+	}
+
+	async unbindUserFromGroup(userId: string, groupId: string): Promise<void> {
+		if (!this.channel) {
+			console.error('RabbitMQ not connected: cannot unbind', userId, 'from group', groupId)
+			return
+		}
+		const queueName = `user.${userId}.messages`
+		await this.channel.unbindQueue(queueName, GROUP_EXCHANGE, `group.${groupId}`)
+	}
+
+	async publishToGroup(groupId: string, message: object): Promise<void> {
+		if (!this.channel) {
+			console.error('RabbitMQ not connected: dropping group publish for', groupId)
+			return
+		}
+		this.channel.publish(
+			GROUP_EXCHANGE,
+			`group.${groupId}`,
 			Buffer.from(JSON.stringify(message)),
 			{ persistent: true }
 		)

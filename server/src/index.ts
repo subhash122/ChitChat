@@ -7,6 +7,7 @@ import authRouter from './routes/auth'
 import usersRouter from './routes/users'
 import conversationsRouter from './routes/conversations'
 import messagesRouter from './routes/messages'
+import groupsRouter from './routes/groups'
 import { rabbitmqService } from './services/rabbitmq'
 import { initializeSocket } from './services/socket'
 
@@ -32,6 +33,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/conversations', conversationsRouter)
 app.use('/api/messages', messagesRouter)
+app.use('/api/groups', groupsRouter)
 
 // Health check
 app.get('/api/health', (_req, res) => {

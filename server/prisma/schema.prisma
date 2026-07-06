@@ -8,15 +8,19 @@ datasource db {
 }
 
 model User {
-  id               String         @id @default(uuid())
-  email            String         @unique
+  id               String          @id @default(uuid())
+  email            String          @unique
   name             String
   password         String
-  createdAt        DateTime       @default(now()) @map("created_at")
-  conversations1   Conversation[] @relation("user1")
-  conversations2   Conversation[] @relation("user2")
-  receivedMessages Message[]      @relation("receiver")
-  sentMessages     Message[]      @relation("sender")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  conversations1   Conversation[]  @relation("user1")
+  conversations2   Conversation[]  @relation("user2")
+  receivedMessages Message[]       @relation("receiver")
+  sentMessages     Message[]       @relation("sender")
+
+  createdGroups       Group[]        @relation("groupCreator")
+  groupMemberships    GroupMember[]
+  sentGroupMessages   GroupMessage[] @relation("groupMessageSender")
 
   @@map("users")
 }
@@ -58,4 +62,46 @@ enum MessageStatus {
   SENT
   DELIVERED
   READ
+}
+
+model Group {
+  id        String   @id @default(uuid())
+  name      String
+  createdBy String   @map("created_by")
+  lastMsgAt DateTime? @map("last_msg_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  creator  User           @relation("groupCreator", fields: [createdBy], references: [id])
+  members  GroupMember[]
+  messages GroupMessage[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String   @id @default(uuid())
+  groupId  String   @map("group_id")
+  userId   String   @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+model GroupMessage {
+  id        String   @id @default(uuid())
+  groupId   String   @map("group_id")
+  senderId  String   @map("sender_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  group  Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  sender User  @relation("groupMessageSender", fields: [senderId], references: [id])
+
+  @@index([groupId, createdAt])
+  @@map("group_messages")
 }
